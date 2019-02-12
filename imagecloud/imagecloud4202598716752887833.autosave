@@ -1,0 +1,7 @@
+void setup() {
+  fullScreen(P3D, 2);
+}
+
+void draw(){
+  background(0);
+}
