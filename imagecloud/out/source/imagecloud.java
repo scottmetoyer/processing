@@ -15,17 +15,25 @@ import java.io.IOException;
 public class imagecloud extends PApplet {
 
 int shardCount = 20;
-int imageCount = 3;
+int imageCount = 1;
 PImage[] images = new PImage[imageCount];
+PGraphics mask;
 Shard[] shards = new Shard[shardCount];
 
 public void setup() {
   // fullScreen(P3D, 2);
   
 
-  images[0] = loadImage("square.png");
-  images[1] = loadImage("cat.png");
-  images[2] = loadImage("splash.png");
+  // images[0] = loadImage("square.png");
+  images[0] = loadImage("cat.png");
+
+  // Create a mask and draw a random triangle on it
+  mask = createGraphics(images[0].width, images[0].height);
+  mask.beginDraw();
+  mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
+  mask.endDraw();
+
+  images[0].mask(mask);
 
   for (int i = 0; i < shardCount; i++) {
     shards[i] = new Shard(images[0]);
@@ -125,8 +133,8 @@ class Shard {
     speed += 0.1f;
 
     // Calculate some jitter
-    // jitter = random(-1, 1);
-    jitter = 0;
+    jitter = random(-1, 1);
+    // jitter = 0;
 
     // Compute the new positions
     current.x = lerp(current.x, target.x, sin(speed));

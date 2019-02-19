@@ -55,8 +55,8 @@ class Shard {
     speed += 0.1;
 
     // Calculate some jitter
-    // jitter = random(-1, 1);
-    jitter = 0;
+    jitter = random(-1, 1);
+    // jitter = 0;
 
     // Compute the new positions
     current.x = lerp(current.x, target.x, sin(speed));
