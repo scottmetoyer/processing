@@ -15,14 +15,20 @@ import java.io.IOException;
 public class imagecloud extends PApplet {
 
 int shardCount = 20;
+int imageCount = 3;
+PImage[] images = new PImage[imageCount];
 Shard[] shards = new Shard[shardCount];
 
 public void setup() {
   // fullScreen(P3D, 2);
   
 
+  images[0] = loadImage("square.png");
+  images[1] = loadImage("cat.png");
+  images[2] = loadImage("splash.png");
+
   for (int i = 0; i < shardCount; i++) {
-    shards[i] = new Shard("square.png");
+    shards[i] = new Shard(images[0]);
   }
   
   frameRate(60);
@@ -46,6 +52,13 @@ public void keyPressed() {
       shards[i].resetRotate();
     }
   }
+
+  if (key == 'c') {
+    int index = PApplet.parseInt(random(imageCount));
+    for (int i = 0; i < shardCount; i++) {
+      shards[i].setImage(images[index]);
+    }
+  }
 }
 
 public void draw(){
@@ -60,6 +73,8 @@ class Shard {
   PVector origin;
   PVector current;
 
+  float jitter;
+
   float targetScale;
   float startScale;
   float currentScale;
@@ -70,8 +85,9 @@ class Shard {
 
   float speed;
   PImage image;
+  int imageIndex;
 
-  Shard(String imagePath) {
+  Shard(PImage img) {
     origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
@@ -79,11 +95,12 @@ class Shard {
     startScale = 1.0f;
     targetScale = 1.0f;
     speed = 0;
+    imageIndex = 0;
 
     targetRotate = 0;
     currentRotate = 0;
 
-    image = loadImage(imagePath);
+    image = img;
   }
 
   public void triggerPulse() {
@@ -99,11 +116,19 @@ class Shard {
     targetRotate = 0;
   }
 
+  public void setImage(PImage img) {
+    image = img;
+  }
+
   public void display() {
     imageMode(CENTER);
     speed += 0.1f;
 
-     // Compute the new positions
+    // Calculate some jitter
+    // jitter = random(-1, 1);
+    jitter = 0;
+
+    // Compute the new positions
     current.x = lerp(current.x, target.x, sin(speed));
     current.y = lerp(current.y, target.y, sin(speed));
     currentScale = lerp(currentScale, targetScale, sin(speed));
@@ -119,7 +144,7 @@ class Shard {
     }
 
     // Compute the new rotate
-    rotateSpeed += 0.1f;
+    rotateSpeed += 0.2f;
     currentRotate = lerp(currentRotate, targetRotate, sin(rotateSpeed));
 
     if (currentRotate == targetRotate) {
@@ -128,7 +153,7 @@ class Shard {
 
     pushMatrix();
     translate(current.x, current.y);
-    rotate(radians(currentRotate));
+    rotate(radians(currentRotate + jitter));
     image(image, 0,  0, image.width * currentScale, image.height * currentScale);
     // image(image, current.x, current.y, image.width * currentScale, image.height * currentScale);
     popMatrix();

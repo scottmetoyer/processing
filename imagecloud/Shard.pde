@@ -3,6 +3,8 @@ class Shard {
   PVector origin;
   PVector current;
 
+  float jitter;
+
   float targetScale;
   float startScale;
   float currentScale;
@@ -13,8 +15,9 @@ class Shard {
 
   float speed;
   PImage image;
+  int imageIndex;
 
-  Shard(String imagePath) {
+  Shard(PImage img) {
     origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
@@ -22,11 +25,12 @@ class Shard {
     startScale = 1.0;
     targetScale = 1.0;
     speed = 0;
+    imageIndex = 0;
 
     targetRotate = 0;
     currentRotate = 0;
 
-    image = loadImage(imagePath);
+    image = img;
   }
 
   void triggerPulse() {
@@ -42,11 +46,19 @@ class Shard {
     targetRotate = 0;
   }
 
+  void setImage(PImage img) {
+    image = img;
+  }
+
   void display() {
     imageMode(CENTER);
     speed += 0.1;
 
-     // Compute the new positions
+    // Calculate some jitter
+    // jitter = random(-1, 1);
+    jitter = 0;
+
+    // Compute the new positions
     current.x = lerp(current.x, target.x, sin(speed));
     current.y = lerp(current.y, target.y, sin(speed));
     currentScale = lerp(currentScale, targetScale, sin(speed));
@@ -62,7 +74,7 @@ class Shard {
     }
 
     // Compute the new rotate
-    rotateSpeed += 0.1;
+    rotateSpeed += 0.2;
     currentRotate = lerp(currentRotate, targetRotate, sin(rotateSpeed));
 
     if (currentRotate == targetRotate) {
@@ -71,7 +83,7 @@ class Shard {
 
     pushMatrix();
     translate(current.x, current.y);
-    rotate(radians(currentRotate));
+    rotate(radians(currentRotate + jitter));
     image(image, 0,  0, image.width * currentScale, image.height * currentScale);
     // image(image, current.x, current.y, image.width * currentScale, image.height * currentScale);
     popMatrix();
