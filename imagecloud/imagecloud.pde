@@ -1,10 +1,11 @@
-Shard[] shards = new Shard[10];
+int shardCount = 20;
+Shard[] shards = new Shard[shardCount];
 
 void setup() {
   // fullScreen(P3D, 2);
-  size(800, 600);
+  size(800, 600, P2D);
 
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < shardCount; i++) {
     shards[i] = new Shard("square.png");
   }
   smooth();
@@ -12,21 +13,29 @@ void setup() {
 }
 
 void keyPressed() {
-  for (int i = 0; i < 10; i++) {
-    shards[i].trigger();
+  if (key == ' ') {
+    for (int i = 0; i < shardCount; i++) {
+      shards[i].triggerPulse();
+    }
+  }
+
+  if (key == 'z') {
+     for (int i = 0; i < shardCount; i++) {
+      shards[i].triggerRotate();
+    }
+  }
+
+  if (key == 'x') {
+     for (int i = 0; i < shardCount; i++) {
+      shards[i].resetRotate();
+    }
   }
 }
 
 void draw(){
   background(0);
 
-  for (int i = 0; i < 10; i++) {
-    shards[i].move();
+  for (int i = 0; i < shardCount; i++) {
     shards[i].display();
   }
-
-  // tint(255, 255);
-  // rotate(radians(0));
-  // scale(1.5);
-
 }
