@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class imagecloud extends PApplet {
 
-int shardCount = 20;
+int shardCount = 100;
 int imageCount = 1;
 PImage[] images = new PImage[imageCount];
 PGraphics mask;
@@ -24,19 +24,8 @@ public void setup() {
   // fullScreen(P3D, 2);
   
 
-  // images[0] = loadImage("square.png");
-  images[0] = loadImage("cat.png");
-
-  // Create a mask and draw a random triangle on it
-  mask = createGraphics(images[0].width, images[0].height);
-  mask.beginDraw();
-  mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
-  mask.endDraw();
-
-  images[0].mask(mask);
-
   for (int i = 0; i < shardCount; i++) {
-    shards[i] = new Shard(images[0]);
+    shards[i] = new Shard("cat.png");
   }
   
   frameRate(60);
@@ -64,7 +53,7 @@ public void keyPressed() {
   if (key == 'c') {
     int index = PApplet.parseInt(random(imageCount));
     for (int i = 0; i < shardCount; i++) {
-      shards[i].setImage(images[index]);
+      shards[i].setImage("square.png");
     }
   }
 }
@@ -95,7 +84,7 @@ class Shard {
   PImage image;
   int imageIndex;
 
-  Shard(PImage img) {
+  Shard(String imagePath) {
     origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
@@ -108,7 +97,7 @@ class Shard {
     targetRotate = 0;
     currentRotate = 0;
 
-    image = img;
+    setImage(imagePath);
   }
 
   public void triggerPulse() {
@@ -124,8 +113,16 @@ class Shard {
     targetRotate = 0;
   }
 
-  public void setImage(PImage img) {
-    image = img;
+  public void setImage(String imagePath) {
+    image = loadImage(imagePath);
+
+    // Create a mask and draw a random triangle on it
+    mask = createGraphics(image.width, image.height);
+    mask.beginDraw();
+    mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
+    mask.endDraw();
+
+    image.mask(mask);
   }
 
   public void display() {

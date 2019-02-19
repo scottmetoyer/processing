@@ -17,7 +17,7 @@ class Shard {
   PImage image;
   int imageIndex;
 
-  Shard(PImage img) {
+  Shard(String imagePath) {
     origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
@@ -30,7 +30,7 @@ class Shard {
     targetRotate = 0;
     currentRotate = 0;
 
-    image = img;
+    setImage(imagePath);
   }
 
   void triggerPulse() {
@@ -46,8 +46,16 @@ class Shard {
     targetRotate = 0;
   }
 
-  void setImage(PImage img) {
-    image = img;
+  void setImage(String imagePath) {
+    image = loadImage(imagePath);
+
+    // Create a mask and draw a random triangle on it
+    mask = createGraphics(image.width, image.height);
+    mask.beginDraw();
+    mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
+    mask.endDraw();
+
+    image.mask(mask);
   }
 
   void display() {
