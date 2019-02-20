@@ -4,6 +4,8 @@ class Shard {
   PVector current;
 
   float jitter;
+  int opacity;
+  boolean visible;
 
   float targetScale;
   float startScale;
@@ -18,7 +20,8 @@ class Shard {
   int imageIndex;
 
   Shard(String imagePath) {
-    origin = new PVector(width/2, height/2);
+    int spread = 25;
+    origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
     currentScale = 1.0;
@@ -26,6 +29,8 @@ class Shard {
     targetScale = 1.0;
     speed = 0;
     imageIndex = 0;
+    opacity = 255;
+    visible = true;
 
     targetRotate = 0;
     currentRotate = 0;
@@ -34,28 +39,45 @@ class Shard {
   }
 
   void triggerPulse() {
-    targetScale = random(1.0);
+    targetScale = random(2.0);
     target = new PVector(random(width), random(height));
   }
 
   void triggerRotate() {
-    targetRotate = random(360.0);
+    targetRotate = random(-360.0, 360.0);
+    targetScale = random(0.8, 1.2);
   }
 
   void resetRotate() {
     targetRotate = 0;
   }
 
+  void setVisible(boolean isVisible) {
+    visible = isVisible;
+  }
+
+  boolean getVisible() {
+    return visible;
+  }
+
   void setImage(String imagePath) {
     image = loadImage(imagePath);
+    image.resize(width/3, 0);
 
     // Create a mask and draw a random triangle on it
-    mask = createGraphics(image.width, image.height);
+    PGraphics mask = createGraphics(image.width, image.height);
     mask.beginDraw();
     mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
     mask.endDraw();
 
     image.mask(mask);
+  }
+
+  void setOpacity(int newOpacity) {
+    opacity = newOpacity;
+  }
+  void setScale(float newScale) {
+    startScale = newScale;
   }
 
   void display() {
@@ -89,11 +111,13 @@ class Shard {
       rotateSpeed = 0;
     }
 
-    pushMatrix();
-    translate(current.x, current.y);
-    rotate(radians(currentRotate + jitter));
-    image(image, 0,  0, image.width * currentScale, image.height * currentScale);
-    // image(image, current.x, current.y, image.width * currentScale, image.height * currentScale);
-    popMatrix();
+    if (visible) {
+      pushMatrix();
+      translate(current.x, current.y);
+      rotate(radians(currentRotate + jitter));
+      tint(255, opacity);
+      image(image, 0,  0, image.width * currentScale, image.height * currentScale);
+      popMatrix();
+    }
   }
 }

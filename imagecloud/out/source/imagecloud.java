@@ -14,46 +14,107 @@ import java.io.IOException;
 
 public class imagecloud extends PApplet {
 
-int shardCount = 100;
+int shardCount = 50;
 int imageCount = 1;
-PImage[] images = new PImage[imageCount];
-PGraphics mask;
-Shard[] shards = new Shard[shardCount];
+Shard[] layer1 = new Shard[shardCount];
+Shard[] layer2 = new Shard[shardCount];
+Shard[] layer3 = new Shard[shardCount];
 
 public void setup() {
-  // fullScreen(P3D, 2);
+  // fullScreen(P2D, 2);
   
 
   for (int i = 0; i < shardCount; i++) {
-    shards[i] = new Shard("cat.png");
+    layer1[i] = new Shard("r1.png");
+    layer1[i].setOpacity((int)random(128, 255));
+    layer1[i].setScale(1.3f);
   }
+
+  for (int i = 0; i < shardCount; i++) {
+    layer2[i] = new Shard("r2.png");
+    layer2[i].setOpacity((int)random(128, 255));
+  }
+
+  for (int i = 0; i < shardCount; i++) {
+    layer3[i] = new Shard("r3.png");
+    layer3[i].setOpacity((int)random(128, 255));
+    layer3[i].setScale(0.7f);
+  }
+
   
   frameRate(60);
 }
 
 public void keyPressed() {
-  if (key == ' ') {
-    for (int i = 0; i < shardCount; i++) {
-      shards[i].triggerPulse();
-    }
-  }
-
   if (key == 'z') {
-     for (int i = 0; i < shardCount; i++) {
-      shards[i].triggerRotate();
+    for (int i = 0; i < shardCount; i++) {
+      layer1[i].triggerPulse();
     }
   }
 
   if (key == 'x') {
      for (int i = 0; i < shardCount; i++) {
-      shards[i].resetRotate();
+      layer1[i].triggerRotate();
     }
   }
 
   if (key == 'c') {
-    int index = PApplet.parseInt(random(imageCount));
+     for (int i = 0; i < shardCount; i++) {
+      layer1[i].resetRotate();
+    }
+  }
+
+  if (key == 'v') {
+     for (int i = 0; i < shardCount; i++) {
+      layer1[i].setVisible(!(layer1[i].getVisible()));
+    }
+  }
+
+  if (key == 'a') {
     for (int i = 0; i < shardCount; i++) {
-      shards[i].setImage("square.png");
+      layer2[i].triggerPulse();
+    }
+  }
+
+  if (key == 's') {
+     for (int i = 0; i < shardCount; i++) {
+      layer2[i].triggerRotate();
+    }
+  }
+
+  if (key == 'd') {
+     for (int i = 0; i < shardCount; i++) {
+      layer2[i].resetRotate();
+    }
+  }
+
+  if (key == 'f') {
+     for (int i = 0; i < shardCount; i++) {
+      layer2[i].setVisible(!(layer2[i].getVisible()));
+    }
+  }
+
+  if (key == 'q') {
+    for (int i = 0; i < shardCount; i++) {
+      layer3[i].triggerPulse();
+    }
+  }
+
+  if (key == 'w') {
+     for (int i = 0; i < shardCount; i++) {
+      layer3[i].triggerRotate();
+    }
+  }
+
+  if (key == 'e') {
+     for (int i = 0; i < shardCount; i++) {
+      layer3[i].resetRotate();
+    }
+  }
+
+  if (key == 'r') {
+     for (int i = 0; i < shardCount; i++) {
+      layer3[i].setVisible(!(layer3[i].getVisible()));
     }
   }
 }
@@ -62,7 +123,15 @@ public void draw(){
   background(0);
 
   for (int i = 0; i < shardCount; i++) {
-    shards[i].display();
+    layer1[i].display();
+  }
+
+  for (int i = 0; i < shardCount; i++) {
+    layer2[i].display();
+  }
+
+  for (int i = 0; i < shardCount; i++) {
+    layer3[i].display();
   }
 }
 class Shard {
@@ -71,6 +140,8 @@ class Shard {
   PVector current;
 
   float jitter;
+  int opacity;
+  boolean visible;
 
   float targetScale;
   float startScale;
@@ -85,7 +156,8 @@ class Shard {
   int imageIndex;
 
   Shard(String imagePath) {
-    origin = new PVector(width/2, height/2);
+    int spread = 25;
+    origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
     currentScale = 1.0f;
@@ -93,6 +165,8 @@ class Shard {
     targetScale = 1.0f;
     speed = 0;
     imageIndex = 0;
+    opacity = 255;
+    visible = true;
 
     targetRotate = 0;
     currentRotate = 0;
@@ -101,28 +175,45 @@ class Shard {
   }
 
   public void triggerPulse() {
-    targetScale = random(1.0f);
+    targetScale = random(2.0f);
     target = new PVector(random(width), random(height));
   }
 
   public void triggerRotate() {
-    targetRotate = random(360.0f);
+    targetRotate = random(-360.0f, 360.0f);
+    targetScale = random(0.8f, 1.2f);
   }
 
   public void resetRotate() {
     targetRotate = 0;
   }
 
+  public void setVisible(boolean isVisible) {
+    visible = isVisible;
+  }
+
+  public boolean getVisible() {
+    return visible;
+  }
+
   public void setImage(String imagePath) {
     image = loadImage(imagePath);
+    image.resize(width/3, 0);
 
     // Create a mask and draw a random triangle on it
-    mask = createGraphics(image.width, image.height);
+    PGraphics mask = createGraphics(image.width, image.height);
     mask.beginDraw();
     mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
     mask.endDraw();
 
     image.mask(mask);
+  }
+
+  public void setOpacity(int newOpacity) {
+    opacity = newOpacity;
+  }
+  public void setScale(float newScale) {
+    startScale = newScale;
   }
 
   public void display() {
@@ -156,12 +247,14 @@ class Shard {
       rotateSpeed = 0;
     }
 
-    pushMatrix();
-    translate(current.x, current.y);
-    rotate(radians(currentRotate + jitter));
-    image(image, 0,  0, image.width * currentScale, image.height * currentScale);
-    // image(image, current.x, current.y, image.width * currentScale, image.height * currentScale);
-    popMatrix();
+    if (visible) {
+      pushMatrix();
+      translate(current.x, current.y);
+      rotate(radians(currentRotate + jitter));
+      tint(255, opacity);
+      image(image, 0,  0, image.width * currentScale, image.height * currentScale);
+      popMatrix();
+    }
   }
 }
   public void settings() {  size(800, 600, P2D);  smooth(); }
