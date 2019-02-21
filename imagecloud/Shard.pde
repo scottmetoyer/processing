@@ -22,9 +22,11 @@ class Shard {
 
   Shard(String[] imagePaths, int imageCnt) {
     int spread = 25;
-    origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
+    // origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
+    origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
+
     currentScale = 1.0;
     startScale = 1.0;
     targetScale = 1.0;
@@ -75,7 +77,7 @@ class Shard {
     // Create a mask and draw a random triangle on it
     PGraphics mask = createGraphics(image.width, image.height);
     mask.beginDraw();
-    mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
+    mask.triangle(random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height));
     mask.endDraw();
 
     image.mask(mask);

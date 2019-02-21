@@ -30,9 +30,9 @@ int imageCount = 3;
 int currentImageIndex = 0;
 
 public void setup() {
+  // fullScreen(P2D);
   
-  // size(800, 600, P2D);
-  String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
+  String[] images = { "p1.jpg", "p2.jpg", "p3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
     layers[0][i] = new Shard(images, imageCount);
@@ -254,9 +254,11 @@ class Shard {
 
   Shard(String[] imagePaths, int imageCnt) {
     int spread = 25;
-    origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
+    // origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
+    origin = new PVector(width/2, height/2);
     target = new PVector(random(width), random(height));
     current = new PVector(origin.x, origin.y);
+
     currentScale = 1.0f;
     startScale = 1.0f;
     targetScale = 1.0f;
@@ -307,7 +309,7 @@ class Shard {
     // Create a mask and draw a random triangle on it
     PGraphics mask = createGraphics(image.width, image.height);
     mask.beginDraw();
-    mask.triangle(random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width));
+    mask.triangle(random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height));
     mask.endDraw();
 
     image.mask(mask);
@@ -365,7 +367,7 @@ class Shard {
     }
   }
 }
-  public void settings() {  fullScreen(P2D); }
+  public void settings() {  size(800, 600, P2D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "imagecloud" };
     if (passedArgs != null) {
