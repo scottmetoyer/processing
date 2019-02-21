@@ -3,6 +3,8 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import processing.serial.*; 
+
 import java.util.HashMap; 
 import java.util.ArrayList; 
 import java.io.File; 
@@ -14,34 +16,45 @@ import java.io.IOException;
 
 public class imagecloud extends PApplet {
 
+
+
 int shardCount = 50;
 int imageCount = 1;
 int layerCount = 3;
+int triggerCount = 0;
+int triggerThreshold = 16;
 Shard[][] layers = new Shard[layerCount][shardCount];
 
+Serial serialPort;
+String serialInput;
+
 public void setup() {
-  // fullScreen(P2D, 2);
   
+  // size(800, 600, P2D);
 
   for (int i = 0; i < shardCount; i++) {
-    layers[0][i] = new Shard("b3.png");
+    layers[0][i] = new Shard("p1.jpg");
     layers[0][i].setOpacity((int)random(128, 255));
     layers[0][i].setScale(1.3f);
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[1][i] = new Shard("b3.png");
+    layers[1][i] = new Shard("p1.jpg");
     layers[1][i].setOpacity((int)random(128, 255));
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[2][i] = new Shard("b3.png");
+    layers[2][i] = new Shard("p1.jpg");
     layers[2][i].setOpacity((int)random(128, 255));
     layers[2][i].setScale(0.7f);
   }
 
-  
+  //smooth();
   frameRate(60);
+
+  // Open up the serial port
+  String portName = Serial.list()[0];
+  serialPort = new Serial(this, portName, 9600);
 }
 
 public void pulseRandomShards() {
@@ -70,6 +83,14 @@ public void rotateAllLayers() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
       layers[j][i].triggerRotate();
+    }
+  }
+}
+
+public void resetRotation() {
+  for (int j = 0; j < layerCount; j++) {
+    for (int i = 0; i < shardCount; i++) {
+      layers[j][i].resetRotate();
     }
   }
 }
@@ -107,7 +128,7 @@ public void keyPressed() {
 
   // Toggle layer visible
   if (key == 'd') {
-    // toggleVisibility()?
+    resetRotation();
   }
   // Reset rotation?
 
@@ -120,7 +141,60 @@ public void keyPressed() {
   }*/
 }
 
+public void processInput(String input) {
+  int randomChoice;
+
+  switch(input) {
+    case "trigger_1":
+    triggerCount++;
+
+    if (triggerCount >= triggerThreshold) {
+      triggerCount = 0;
+      resetRotation();
+    } else {
+      randomChoice = (int)random(2);
+
+      if (randomChoice == 0) {
+        rotateRandomLayer();
+      } else {
+        rotateAllLayers();
+      }
+    }
+    break;
+
+    case "trigger_2":
+    pulseRandomShards();
+    break;
+
+    case "trigger_3":
+    randomChoice = (int)random(6);
+
+    if (randomChoice == 5) {
+      pulseAllShards(0);
+      pulseAllShards(1);
+      pulseAllShards(2);
+    } else if (randomChoice == 4) {
+      pulseAllShards(1);
+      pulseAllShards(2);
+    } else if (randomChoice == 3) {
+      pulseAllShards(1);
+      pulseAllShards(2);
+    } else {
+      pulseAllShards(randomChoice);
+    }
+    break;
+  }
+}
+
 public void draw(){
+  // Check for serial data
+  if (serialPort.available() > 0) {
+    serialInput = serialPort.readStringUntil('\n');
+    processInput(serialInput);
+  }
+
+  // TODO: Act on the serial input accordingly
+
   background(0);
 
   for (int j = 0; j < layerCount; j++) {
@@ -252,7 +326,7 @@ class Shard {
     }
   }
 }
-  public void settings() {  size(800, 600, P2D);  smooth(); }
+  public void settings() {  fullScreen(P2D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "imagecloud" };
     if (passedArgs != null) {
