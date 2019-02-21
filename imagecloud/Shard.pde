@@ -16,10 +16,11 @@ class Shard {
   float rotateSpeed;
 
   float speed;
-  PImage image;
+  PImage images[];
   int imageIndex;
+  int imageCount;
 
-  Shard(String imagePath) {
+  Shard(String[] imagePaths, int imageCnt) {
     int spread = 25;
     origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
     target = new PVector(random(width), random(height));
@@ -35,7 +36,13 @@ class Shard {
     targetRotate = 0;
     currentRotate = 0;
 
-    setImage(imagePath);
+    imageCount = imageCnt;
+    imageIndex = 0;
+    images = new PImage[imageCnt];
+
+    for (int i = 0; i < imageCount; i++) {
+      setImage(imagePaths[i], i);
+    }
   }
 
   void triggerPulse() {
@@ -60,8 +67,9 @@ class Shard {
     return visible;
   }
 
-  void setImage(String imagePath) {
-    image = loadImage(imagePath);
+  void setImage(String imagePath, int idx) {
+    images[idx] = loadImage(imagePath);
+    PImage image = images[idx];
     image.resize(width/3, 0);
 
     // Create a mask and draw a random triangle on it
@@ -71,6 +79,10 @@ class Shard {
     mask.endDraw();
 
     image.mask(mask);
+  }
+
+  void setImageIndex(int newIndex) {
+    imageIndex = newIndex;
   }
 
   void setOpacity(int newOpacity) {
@@ -116,7 +128,7 @@ class Shard {
       translate(current.x, current.y);
       rotate(radians(currentRotate + jitter));
       tint(255, opacity);
-      image(image, 0,  0, image.width * currentScale, image.height * currentScale);
+      image(images[imageIndex], 0,  0, images[imageIndex].width * currentScale, images[imageIndex].height * currentScale);
       popMatrix();
     }
   }

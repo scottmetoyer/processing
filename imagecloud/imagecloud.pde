@@ -1,7 +1,6 @@
 import processing.serial.*;
 
 int shardCount = 50;
-int imageCount = 1;
 int layerCount = 3;
 int triggerCount = 0;
 int triggerThreshold = 16;
@@ -9,24 +8,27 @@ Shard[][] layers = new Shard[layerCount][shardCount];
 
 Serial serialPort;
 String serialInput;
+int imageCount = 3;
+int currentImageIndex = 0;
 
 void setup() {
   fullScreen(P2D);
   // size(800, 600, P2D);
+  String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
-    layers[0][i] = new Shard("p1.jpg");
+    layers[0][i] = new Shard(images, imageCount);
     layers[0][i].setOpacity((int)random(128, 255));
     layers[0][i].setScale(1.3);
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[1][i] = new Shard("p1.jpg");
+    layers[1][i] = new Shard(images, imageCount);
     layers[1][i].setOpacity((int)random(128, 255));
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[2][i] = new Shard("p1.jpg");
+    layers[2][i] = new Shard(images, imageCount);
     layers[2][i].setOpacity((int)random(128, 255));
     layers[2][i].setScale(0.7);
   }
@@ -39,6 +41,15 @@ void setup() {
   serialPort = new Serial(this, portName, 9600);
 }
 
+int randomExcept(int top, int exclude) {
+  int number;
+
+  do {
+    number = (int)random(top);
+  } while (number == exclude);
+
+  return number;
+}
 void pulseRandomShards() {
   int layer = (int)random(layerCount);
   int shards = (int)random(shardCount);
@@ -56,15 +67,25 @@ void pulseAllShards(int layer) {
 
 void rotateRandomLayer() {
   int layer = (int)random(layerCount);
-    for (int i = 0; i < shardCount; i++) {
-      layers[layer][i].triggerRotate();
-    }
+  for (int i = 0; i < shardCount; i++) {
+    layers[layer][i].triggerRotate();
+  }
 }
 
 void rotateAllLayers() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
       layers[j][i].triggerRotate();
+    }
+  }
+}
+
+void setRandomImage() {
+  currentImageIndex = randomExcept(imageCount, currentImageIndex);
+
+  for (int j = 0; j < layerCount; j++) {
+    for (int i = 0; i < shardCount; i++) {
+      layers[j][i].setImageIndex(currentImageIndex);
     }
   }
 }
@@ -112,8 +133,11 @@ void keyPressed() {
   if (key == 'd') {
     resetRotation();
   }
-  // Reset rotation?
 
+  // Reset rotation?
+  if (key == 'f') {
+    setRandomImage();
+  }
 
   /*
   if (key == 'r') {

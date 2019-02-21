@@ -19,7 +19,6 @@ public class imagecloud extends PApplet {
 
 
 int shardCount = 50;
-int imageCount = 1;
 int layerCount = 3;
 int triggerCount = 0;
 int triggerThreshold = 16;
@@ -27,24 +26,27 @@ Shard[][] layers = new Shard[layerCount][shardCount];
 
 Serial serialPort;
 String serialInput;
+int imageCount = 3;
+int currentImageIndex = 0;
 
 public void setup() {
   
   // size(800, 600, P2D);
+  String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
-    layers[0][i] = new Shard("p1.jpg");
+    layers[0][i] = new Shard(images, imageCount);
     layers[0][i].setOpacity((int)random(128, 255));
     layers[0][i].setScale(1.3f);
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[1][i] = new Shard("p1.jpg");
+    layers[1][i] = new Shard(images, imageCount);
     layers[1][i].setOpacity((int)random(128, 255));
   }
 
   for (int i = 0; i < shardCount; i++) {
-    layers[2][i] = new Shard("p1.jpg");
+    layers[2][i] = new Shard(images, imageCount);
     layers[2][i].setOpacity((int)random(128, 255));
     layers[2][i].setScale(0.7f);
   }
@@ -57,6 +59,15 @@ public void setup() {
   serialPort = new Serial(this, portName, 9600);
 }
 
+public int randomExcept(int top, int exclude) {
+  int number;
+
+  do {
+    number = (int)random(top);
+  } while (number == exclude);
+
+  return number;
+}
 public void pulseRandomShards() {
   int layer = (int)random(layerCount);
   int shards = (int)random(shardCount);
@@ -74,15 +85,25 @@ public void pulseAllShards(int layer) {
 
 public void rotateRandomLayer() {
   int layer = (int)random(layerCount);
-    for (int i = 0; i < shardCount; i++) {
-      layers[layer][i].triggerRotate();
-    }
+  for (int i = 0; i < shardCount; i++) {
+    layers[layer][i].triggerRotate();
+  }
 }
 
 public void rotateAllLayers() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
       layers[j][i].triggerRotate();
+    }
+  }
+}
+
+public void setRandomImage() {
+  currentImageIndex = randomExcept(imageCount, currentImageIndex);
+
+  for (int j = 0; j < layerCount; j++) {
+    for (int i = 0; i < shardCount; i++) {
+      layers[j][i].setImageIndex(currentImageIndex);
     }
   }
 }
@@ -130,8 +151,11 @@ public void keyPressed() {
   if (key == 'd') {
     resetRotation();
   }
-  // Reset rotation?
 
+  // Reset rotation?
+  if (key == 'f') {
+    setRandomImage();
+  }
 
   /*
   if (key == 'r') {
@@ -146,9 +170,7 @@ public void processInput(String input) {
 
   switch(input) {
     case "trigger_1":
-    triggerCount++;
-
-    if (triggerCount >= triggerThreshold) {
+    if (triggerCount++ >= triggerThreshold) {
       triggerCount = 0;
       resetRotation();
     } else {
@@ -221,10 +243,11 @@ class Shard {
   float rotateSpeed;
 
   float speed;
-  PImage image;
+  PImage images[];
   int imageIndex;
+  int imageCount;
 
-  Shard(String imagePath) {
+  Shard(String[] imagePaths, int imageCnt) {
     int spread = 25;
     origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
     target = new PVector(random(width), random(height));
@@ -240,7 +263,13 @@ class Shard {
     targetRotate = 0;
     currentRotate = 0;
 
-    setImage(imagePath);
+    imageCount = imageCnt;
+    imageIndex = 0;
+    images = new PImage[imageCnt];
+
+    for (int i = 0; i < imageCount; i++) {
+      setImage(imagePaths[i], i);
+    }
   }
 
   public void triggerPulse() {
@@ -265,8 +294,9 @@ class Shard {
     return visible;
   }
 
-  public void setImage(String imagePath) {
-    image = loadImage(imagePath);
+  public void setImage(String imagePath, int idx) {
+    images[idx] = loadImage(imagePath);
+    PImage image = images[idx];
     image.resize(width/3, 0);
 
     // Create a mask and draw a random triangle on it
@@ -276,6 +306,10 @@ class Shard {
     mask.endDraw();
 
     image.mask(mask);
+  }
+
+  public void setImageIndex(int newIndex) {
+    imageIndex = newIndex;
   }
 
   public void setOpacity(int newOpacity) {
@@ -321,7 +355,7 @@ class Shard {
       translate(current.x, current.y);
       rotate(radians(currentRotate + jitter));
       tint(255, opacity);
-      image(image, 0,  0, image.width * currentScale, image.height * currentScale);
+      image(images[imageIndex], 0,  0, images[imageIndex].width * currentScale, images[imageIndex].height * currentScale);
       popMatrix();
     }
   }
