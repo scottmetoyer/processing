@@ -186,6 +186,11 @@ public void processInput(String input) {
 
     case "trigger_2":
     pulseRandomShards();
+
+    randomChoice = (int)random(6);
+    if (randomChoice == 0) {
+      setRandomImage();
+    }
     break;
 
     case "trigger_3":
