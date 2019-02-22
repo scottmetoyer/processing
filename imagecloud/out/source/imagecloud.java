@@ -171,8 +171,12 @@ public void processInput(String input) {
   switch(input) {
     case "trigger_1\n":
     if (triggerCount++ >= triggerThreshold) {
-      triggerCount = 0;
-      resetRotation();
+      randomChoice = (int)random(2);
+
+      if (randomChoice == 0) {
+        triggerCount = 0;
+        resetRotation();
+      }
     } else {
       randomChoice = (int)random(2);
 
@@ -329,7 +333,7 @@ class Shard {
 
   public void display() {
     imageMode(CENTER);
-    speed += 0.1f;
+    speed += 0.17f;
 
     // Calculate some jitter
     jitter = random(-1, 1);
@@ -351,7 +355,7 @@ class Shard {
     }
 
     // Compute the new rotate
-    rotateSpeed += 0.2f;
+    rotateSpeed += 0.25f;
     currentRotate = lerp(currentRotate, targetRotate, sin(rotateSpeed));
 
     if (currentRotate == targetRotate) {
