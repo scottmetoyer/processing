@@ -12,8 +12,8 @@ int imageCount = 3;
 int currentImageIndex = 0;
 
 void setup() {
-  // fullScreen(P2D);
-  size(800, 600, P2D);
+  fullScreen(P2D);
+  //size(800, 600, P2D);
   String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
@@ -37,7 +37,7 @@ void setup() {
   frameRate(60);
 
   // Open up the serial port
-  String portName = Serial.list()[0];
+  String portName = Serial.list()[1];
   serialPort = new Serial(this, portName, 9600);
 }
 
@@ -151,10 +151,14 @@ void processInput(String input) {
   int randomChoice;
 
   switch(input) {
-    case "trigger_1":
+    case "trigger_1\n":
     if (triggerCount++ >= triggerThreshold) {
-      triggerCount = 0;
-      resetRotation();
+      randomChoice = (int)random(2);
+
+      if (randomChoice == 0) {
+        triggerCount = 0;
+        resetRotation();
+      }
     } else {
       randomChoice = (int)random(2);
 
@@ -166,7 +170,7 @@ void processInput(String input) {
     }
     break;
 
-    case "trigger_2":
+    case "trigger_2\n":
     pulseRandomShards();
 
     randomChoice = (int)random(6);
@@ -175,7 +179,7 @@ void processInput(String input) {
     }
     break;
 
-    case "trigger_3":
+    case "trigger_3\n":
     randomChoice = (int)random(6);
 
     if (randomChoice == 5) {
@@ -199,6 +203,7 @@ void draw(){
   // Check for serial data
   if (serialPort.available() > 0) {
     serialInput = serialPort.readStringUntil('\n');
+    print(serialInput);
     processInput(serialInput);
   }
 

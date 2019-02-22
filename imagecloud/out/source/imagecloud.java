@@ -30,9 +30,9 @@ int imageCount = 3;
 int currentImageIndex = 0;
 
 public void setup() {
-  // fullScreen(P2D);
   
-  String[] images = { "p1.jpg", "p2.jpg", "p3.jpg" };
+  //size(800, 600, P2D);
+  String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
     layers[0][i] = new Shard(images, imageCount);
@@ -55,7 +55,7 @@ public void setup() {
   frameRate(60);
 
   // Open up the serial port
-  String portName = Serial.list()[0];
+  String portName = Serial.list()[1];
   serialPort = new Serial(this, portName, 9600);
 }
 
@@ -169,7 +169,7 @@ public void processInput(String input) {
   int randomChoice;
 
   switch(input) {
-    case "trigger_1":
+    case "trigger_1\n":
     if (triggerCount++ >= triggerThreshold) {
       triggerCount = 0;
       resetRotation();
@@ -184,7 +184,7 @@ public void processInput(String input) {
     }
     break;
 
-    case "trigger_2":
+    case "trigger_2\n":
     pulseRandomShards();
 
     randomChoice = (int)random(6);
@@ -193,7 +193,7 @@ public void processInput(String input) {
     }
     break;
 
-    case "trigger_3":
+    case "trigger_3\n":
     randomChoice = (int)random(6);
 
     if (randomChoice == 5) {
@@ -217,6 +217,7 @@ public void draw(){
   // Check for serial data
   if (serialPort.available() > 0) {
     serialInput = serialPort.readStringUntil('\n');
+    print(serialInput);
     processInput(serialInput);
   }
 
@@ -367,7 +368,7 @@ class Shard {
     }
   }
 }
-  public void settings() {  size(800, 600, P2D); }
+  public void settings() {  fullScreen(P2D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "imagecloud" };
     if (passedArgs != null) {
