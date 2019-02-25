@@ -30,8 +30,8 @@ int imageCount = 3;
 int currentImageIndex = 0;
 
 public void setup() {
+  //fullScreen(P2D);
   
-  //size(800, 600, P2D);
   String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
@@ -333,7 +333,7 @@ class Shard {
 
   public void display() {
     imageMode(CENTER);
-    speed += 0.17f;
+    speed += 0.1f;
 
     // Calculate some jitter
     jitter = random(-1, 1);
@@ -355,7 +355,7 @@ class Shard {
     }
 
     // Compute the new rotate
-    rotateSpeed += 0.25f;
+    rotateSpeed += 0.2f;
     currentRotate = lerp(currentRotate, targetRotate, sin(rotateSpeed));
 
     if (currentRotate == targetRotate) {
@@ -372,7 +372,7 @@ class Shard {
     }
   }
 }
-  public void settings() {  fullScreen(P2D); }
+  public void settings() {  size(800, 600, P2D); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "imagecloud" };
     if (passedArgs != null) {

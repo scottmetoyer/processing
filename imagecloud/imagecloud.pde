@@ -12,8 +12,8 @@ int imageCount = 3;
 int currentImageIndex = 0;
 
 void setup() {
-  fullScreen(P2D);
-  //size(800, 600, P2D);
+  //fullScreen(P2D);
+  size(800, 600, P2D);
   String[] images = { "b1.jpg", "b2.jpg", "b3.jpg" };
 
   for (int i = 0; i < shardCount; i++) {
