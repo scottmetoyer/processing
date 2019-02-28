@@ -1,4 +1,4 @@
-class Shard {
+class Sliver {
   PVector target;
   PVector origin;
   PVector current;
@@ -20,7 +20,7 @@ class Shard {
   int imageIndex;
   int imageCount;
 
-  Shard(String[] imagePaths, int imageCnt) {
+  Sliver(String[] imagePaths, int imageCnt) {
     int spread = 25;
     // origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
     origin = new PVector(width/2, height/2);
@@ -90,7 +90,6 @@ class Shard {
   void setOpacity(int newOpacity) {
     opacity = newOpacity;
   }
-
   void setScale(float newScale) {
     startScale = newScale;
   }
