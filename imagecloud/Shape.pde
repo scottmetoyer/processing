@@ -7,6 +7,8 @@ interface Shape {
   void setVisible(boolean);
   boolean getVisible();
 
+  void setScale(float);
+  void setOpacity(int);
 
   void display();
 }
