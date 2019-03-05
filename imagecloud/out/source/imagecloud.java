@@ -37,7 +37,7 @@ public void setup() {
   for (int i = 0; i < shardCount; i++) {
     layers[0][i] = new Shard(images, imageCount);
     layers[0][i].setOpacity((int)random(128, 255));
-    layers[0][i].setScale(1.3f);
+    layers[0][i].setSize(1.3f);
   }
 
   for (int i = 0; i < shardCount; i++) {
@@ -48,7 +48,7 @@ public void setup() {
   for (int i = 0; i < shardCount; i++) {
     layers[2][i] = new Shard(images, imageCount);
     layers[2][i].setOpacity((int)random(128, 255));
-    layers[2][i].setScale(0.7f);
+    layers[2][i].setSize(0.7f);
   }
 
   //smooth();
@@ -68,6 +68,7 @@ public int randomExcept(int top, int exclude) {
 
   return number;
 }
+
 public void pulseRandomShards() {
   int layer = (int)random(layerCount);
   int shards = (int)random(shardCount);
@@ -83,17 +84,17 @@ public void pulseAllShards(int layer) {
   }
 }
 
-public void rotateRandomLayer() {
+public void moveRandomLayer() {
   int layer = (int)random(layerCount);
   for (int i = 0; i < shardCount; i++) {
-    layers[layer][i].triggerRotate();
+    layers[layer][i].triggerMove();
   }
 }
 
-public void rotateAllLayers() {
+public void moveAllLayers() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
-      layers[j][i].triggerRotate();
+      layers[j][i].triggerMove();
     }
   }
 }
@@ -108,10 +109,10 @@ public void setRandomImage() {
   }
 }
 
-public void resetRotation() {
+public void resetAll() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
-      layers[j][i].resetRotate();
+      layers[j][i].reset();
     }
   }
 }
@@ -139,17 +140,17 @@ public void keyPressed() {
 
   // Rotate random layer
   if (key == 'a') {
-    rotateRandomLayer();
+    moveRandomLayer();
   }
 
   // Rotate all layers
   if (key == 's') {
-    rotateAllLayers();
+    moveAllLayers();
   }
 
   // Toggle layer visible
   if (key == 'd') {
-    resetRotation();
+    resetAll();
   }
 
   // Reset rotation?
@@ -175,15 +176,15 @@ public void processInput(String input) {
 
       if (randomChoice == 0) {
         triggerCount = 0;
-        resetRotation();
+        resetAll();
       }
     } else {
       randomChoice = (int)random(2);
 
       if (randomChoice == 0) {
-        rotateRandomLayer();
+        moveRandomLayer();
       } else {
-        rotateAllLayers();
+        moveAllLayers();
       }
     }
     break;
@@ -225,55 +226,58 @@ public void draw(){
     processInput(serialInput);
   }
 
-  // TODO: Act on the serial input accordingly
-
   background(0);
 
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
+      layers[j][i].update();
       layers[j][i].display();
     }
   }
 }
-class Shard {
-  PVector target;
-  PVector origin;
-  PVector current;
-
-  float jitter;
-  int opacity;
-  boolean visible;
+abstract class Shape {
+  PVector targetPosition;
+  PVector startPosition;
+  PVector currentPosition;
 
   float targetScale;
   float startScale;
   float currentScale;
 
-  float targetRotate;
-  float currentRotate;
-  float rotateSpeed;
+  float targetRotation;
+  float currentRotation;
 
-  float speed;
+
+  int opacity;
+  float movementSpeed;
+  float rotationSpeed;
+  boolean visible;
+
   PImage images[];
   int imageIndex;
   int imageCount;
 
-  Shard(String[] imagePaths, int imageCnt) {
+  Shape(String[] imagePaths, int imageCnt) {
     int spread = 25;
     // origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
-    origin = new PVector(width/2, height/2);
-    target = new PVector(random(width), random(height));
-    current = new PVector(origin.x, origin.y);
+
+    startPosition = new PVector(width/2, height/2);
+    targetPosition = new PVector(startPosition.x, startPosition.y);
+    currentPosition = new PVector(startPosition.x, startPosition.y);
 
     currentScale = 1.0f;
     startScale = 1.0f;
     targetScale = 1.0f;
-    speed = 0;
+
+    movementSpeed = 0;
+    rotationSpeed = 0;
+
     imageIndex = 0;
     opacity = 255;
     visible = true;
 
-    targetRotate = 0;
-    currentRotate = 0;
+    targetRotation = 0;
+    currentRotation = 0;
 
     imageCount = imageCnt;
     imageIndex = 0;
@@ -286,16 +290,20 @@ class Shard {
 
   public void triggerPulse() {
     targetScale = random(2.0f);
-    target = new PVector(random(width), random(height));
   }
 
-  public void triggerRotate() {
-    targetRotate = random(-360.0f, 360.0f);
-    targetScale = random(0.8f, 1.2f);
+  public void triggerMove() {
+    targetPosition = new PVector(random(width), random(height));
   }
 
-  public void resetRotate() {
-    targetRotate = 0;
+  public void triggerRotation() {
+    targetRotation = random(-360.0f, 360.0f);
+  }
+
+  public void reset() {
+    targetRotation = 0;
+    targetScale = 1.0f;
+    targetPosition = new PVector(startPosition.x, startPosition.y);
   }
 
   public void setVisible(boolean isVisible) {
@@ -306,69 +314,158 @@ class Shard {
     return visible;
   }
 
+  public void setOpacity(int newOpacity) {
+    opacity = newOpacity;
+  }
+
+  public int getOpacity() {
+    return opacity;
+  }
+
+  public void setSize(float newSize) {
+    startScale = newSize;
+  }
+
+  public float getScale() {
+    return startScale;
+  }
+
   public void setImage(String imagePath, int idx) {
     images[idx] = loadImage(imagePath);
     PImage image = images[idx];
     image.resize(width/3, 0);
-
-    // Create a mask and draw a random triangle on it
-    PGraphics mask = createGraphics(image.width, image.height);
-    mask.beginDraw();
-    mask.triangle(random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height));
-    mask.endDraw();
-
-    image.mask(mask);
   }
 
   public void setImageIndex(int newIndex) {
     imageIndex = newIndex;
   }
 
-  public void setOpacity(int newOpacity) {
-    opacity = newOpacity;
-  }
-  public void setScale(float newScale) {
-    startScale = newScale;
+  public void update() {
+    // Override this in the inherited class and update every frame as needed. Check for movement boundaries, etc.
   }
 
   public void display() {
-    imageMode(CENTER);
-    speed += 0.1f;
-
     // Calculate some jitter
-    jitter = random(-1, 1);
+    float jitter = random(-1, 1);
     // jitter = 0;
 
-    // Compute the new positions
-    current.x = lerp(current.x, target.x, sin(speed));
-    current.y = lerp(current.y, target.y, sin(speed));
-    currentScale = lerp(currentScale, targetScale, sin(speed));
+    imageMode(CENTER);
+    movementSpeed += 0.1f;
 
-    if (current.x == target.x || current.y == target.y) {
-      target = new PVector(origin.x, origin.y);
-      targetScale = startScale;
-      speed = 0;
+    // Compute the new position and scale
+    currentPosition.x = lerp(currentPosition.x, targetPosition.x, sin(movementSpeed));
+    currentPosition.y = lerp(currentPosition.y, targetPosition.y, sin(movementSpeed));
+    currentScale = lerp(currentScale, targetScale, sin(movementSpeed));
+
+    // Compute the new rotation
+    rotationSpeed += 0.2f;
+    currentRotation = lerp(currentRotation, targetRotation, sin(rotationSpeed));
+
+    if (currentRotation == targetRotation) {
+      rotationSpeed = 0;
     }
 
-    if (current.x == origin.x || current.y == origin.y) {
-      speed = 0;
-    }
-
-    // Compute the new rotate
-    rotateSpeed += 0.2f;
-    currentRotate = lerp(currentRotate, targetRotate, sin(rotateSpeed));
-
-    if (currentRotate == targetRotate) {
-      rotateSpeed = 0;
+    if (currentPosition.x == startPosition.x || currentPosition.y == startPosition.y) {
+      movementSpeed = 0;
     }
 
     if (visible) {
       pushMatrix();
-      translate(current.x, current.y);
-      rotate(radians(currentRotate + jitter));
+      translate(currentPosition.x, currentPosition.y);
+      rotate(radians(currentRotation + jitter));
       tint(255, opacity);
       image(images[imageIndex], 0,  0, images[imageIndex].width * currentScale, images[imageIndex].height * currentScale);
       popMatrix();
+    }
+  }
+}
+class Shard extends Shape{
+  Shard(String[] imagePaths, int imageCnt) {
+    super(imagePaths, imageCnt);
+    setMasks();
+  }
+
+  // Shape implementation methods
+  public void triggerPulse() {
+    targetScale = random(2.0f);
+    targetPosition = new PVector(random(width), random(height));
+  }
+
+  public void triggerMove() {
+    targetRotation = random(-360.0f, 360.0f);
+    targetScale = random(0.8f, 1.2f);
+  }
+
+  public void triggerRotation() {
+    // Do nothing
+  }
+
+  public void reset() {
+    targetRotation = 0;
+  }
+
+  public void setMasks() {
+    for (int i = 0; i < imageCount; i++) {
+      // Create a mask and draw a random triangle on it
+      PGraphics mask = createGraphics(images[i].width, images[i].height);
+      mask.beginDraw();
+      mask.triangle(random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height));
+      mask.endDraw();
+      images[i].mask(mask);
+    }
+  }
+
+  public void update() {
+    // Check for boundaries and set target to origin
+    if (currentPosition.x == targetPosition.x || currentPosition.y == targetPosition.y) {
+      targetPosition = new PVector(startPosition.x, startPosition.y);
+      targetScale = startScale;
+      movementSpeed = 0;
+    }
+  }
+}
+class Sliver extends Shape {
+    Sliver(String[] imagePaths, int imageCnt) {
+    super(imagePaths, imageCnt);
+    setMasks();
+  }
+
+  // Shape implementation methods
+  public void triggerPulse() {
+    targetScale = random(2.0f);
+    targetPosition = new PVector(random(width), random(height));
+  }
+
+  public void triggerMove() {
+    targetRotation = random(-360.0f, 360.0f);
+    targetScale = random(0.8f, 1.2f);
+  }
+
+  public void triggerRotation() {
+    // Do nothing
+  }
+
+  public void reset() {
+    targetRotation = 0;
+  }
+
+  public void setMasks() {
+    for (int i = 0; i < imageCount; i++) {
+      // Create a mask and draw a random triangle on it
+      PGraphics mask = createGraphics(images[i].width, images[i].height);
+      mask.beginDraw();
+      mask.triangle(random(mask.width), random(mask.height), random(mask.width), random(mask.height), random(mask.width), random(mask.height));
+      mask.endDraw();
+      images[i].mask(mask);
+    }
+  }
+
+  public void update() {
+    // Check for boundaries and set target to origin
+    if (currentPosition.x == targetPosition.x || currentPosition.y == targetPosition.y) {
+      // target = new PVector(origin.x, origin.y);
+      // targetScale = startScale;
+      movementSpeed = 0;
     }
   }
 }

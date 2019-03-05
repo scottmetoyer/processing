@@ -19,7 +19,7 @@ void setup() {
   for (int i = 0; i < shardCount; i++) {
     layers[0][i] = new Shard(images, imageCount);
     layers[0][i].setOpacity((int)random(128, 255));
-    layers[0][i].setScale(1.3);
+    layers[0][i].setSize(1.3);
   }
 
   for (int i = 0; i < shardCount; i++) {
@@ -30,7 +30,7 @@ void setup() {
   for (int i = 0; i < shardCount; i++) {
     layers[2][i] = new Shard(images, imageCount);
     layers[2][i].setOpacity((int)random(128, 255));
-    layers[2][i].setScale(0.7);
+    layers[2][i].setSize(0.7);
   }
 
   //smooth();
@@ -50,6 +50,7 @@ int randomExcept(int top, int exclude) {
 
   return number;
 }
+
 void pulseRandomShards() {
   int layer = (int)random(layerCount);
   int shards = (int)random(shardCount);
@@ -65,17 +66,17 @@ void pulseAllShards(int layer) {
   }
 }
 
-void rotateRandomLayer() {
+void moveRandomLayer() {
   int layer = (int)random(layerCount);
   for (int i = 0; i < shardCount; i++) {
-    layers[layer][i].triggerRotate();
+    layers[layer][i].triggerMove();
   }
 }
 
-void rotateAllLayers() {
+void moveAllLayers() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
-      layers[j][i].triggerRotate();
+      layers[j][i].triggerMove();
     }
   }
 }
@@ -90,10 +91,10 @@ void setRandomImage() {
   }
 }
 
-void resetRotation() {
+void resetAll() {
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
-      layers[j][i].resetRotate();
+      layers[j][i].reset();
     }
   }
 }
@@ -121,17 +122,17 @@ void keyPressed() {
 
   // Rotate random layer
   if (key == 'a') {
-    rotateRandomLayer();
+    moveRandomLayer();
   }
 
   // Rotate all layers
   if (key == 's') {
-    rotateAllLayers();
+    moveAllLayers();
   }
 
   // Toggle layer visible
   if (key == 'd') {
-    resetRotation();
+    resetAll();
   }
 
   // Reset rotation?
@@ -157,15 +158,15 @@ void processInput(String input) {
 
       if (randomChoice == 0) {
         triggerCount = 0;
-        resetRotation();
+        resetAll();
       }
     } else {
       randomChoice = (int)random(2);
 
       if (randomChoice == 0) {
-        rotateRandomLayer();
+        moveRandomLayer();
       } else {
-        rotateAllLayers();
+        moveAllLayers();
       }
     }
     break;
@@ -207,12 +208,11 @@ void draw(){
     processInput(serialInput);
   }
 
-  // TODO: Act on the serial input accordingly
-
   background(0);
 
   for (int j = 0; j < layerCount; j++) {
     for (int i = 0; i < shardCount; i++) {
+      layers[j][i].update();
       layers[j][i].display();
     }
   }
