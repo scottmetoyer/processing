@@ -35,11 +35,12 @@ class Shard extends Shape{
   }
 
   void update() {
-    // Check for boundaries and set target to origin
+    // Check for boundaries and set target to origin as needed
     if (currentPosition.x == targetPosition.x || currentPosition.y == targetPosition.y) {
       targetPosition = new PVector(startPosition.x, startPosition.y);
       targetScale = startScale;
       movementSpeed = 0;
+      scaleSpeed = 0;
     }
   }
 }

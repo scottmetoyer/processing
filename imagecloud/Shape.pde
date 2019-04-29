@@ -10,10 +10,10 @@ abstract class Shape {
   float targetRotation;
   float currentRotation;
 
-
   int opacity;
   float movementSpeed;
   float rotationSpeed;
+  float scaleSpeed;
   boolean visible;
 
   PImage images[];
@@ -22,9 +22,9 @@ abstract class Shape {
 
   Shape(String[] imagePaths, int imageCnt) {
     int spread = 25;
-    // origin = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
+    startPosition = new PVector(width/2 + random(spread * -1, spread), height/2 + random(spread * -1, spread));
 
-    startPosition = new PVector(width/2, height/2);
+    // startPosition = new PVector(width/2, height/2);
     targetPosition = new PVector(startPosition.x, startPosition.y);
     currentPosition = new PVector(startPosition.x, startPosition.y);
 
@@ -34,6 +34,7 @@ abstract class Shape {
 
     movementSpeed = 0;
     rotationSpeed = 0;
+    scaleSpeed = 0;
 
     imageIndex = 0;
     opacity = 255;
@@ -113,15 +114,15 @@ abstract class Shape {
     // jitter = 0;
 
     imageMode(CENTER);
+
     movementSpeed += 0.1;
+    scaleSpeed += 0.1;
+    rotationSpeed += 0.2;
 
     // Compute the new position and scale
     currentPosition.x = lerp(currentPosition.x, targetPosition.x, sin(movementSpeed));
     currentPosition.y = lerp(currentPosition.y, targetPosition.y, sin(movementSpeed));
-    currentScale = lerp(currentScale, targetScale, sin(movementSpeed));
-
-    // Compute the new rotation
-    rotationSpeed += 0.2;
+    currentScale = lerp(currentScale, targetScale, sin(scaleSpeed));
     currentRotation = lerp(currentRotation, targetRotation, sin(rotationSpeed));
 
     if (currentRotation == targetRotation) {
@@ -130,6 +131,10 @@ abstract class Shape {
 
     if (currentPosition.x == startPosition.x || currentPosition.y == startPosition.y) {
       movementSpeed = 0;
+    }
+
+    if (currentScale == targetScale) {
+      scaleSpeed = 0;
     }
 
     if (visible) {
